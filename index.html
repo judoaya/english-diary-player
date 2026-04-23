@@ -62,18 +62,20 @@
             font-size: 14px;
         }
 
-        select {
+        input[type="range"] {
             width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
+            height: 40px;
+            padding: 0;
+            border: none;
             border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
         }
 
-        select:focus {
-            outline: none;
-            border-color: #667eea;
+        .speed-display {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 5px;
         }
 
         .button-group {
@@ -234,15 +236,13 @@
 <body>
     <div class="container">
         <h1>📖 English Diary Shadowing Player</h1>
-        <p class="subtitle">Google翻訳の音声でシャドーイング練習</p>
+        <p class="subtitle">音声合成でシャドーイング練習</p>
 
         <div class="controls">
             <div class="control-group">
-                <label for="language">🌐 言語</label>
-                <select id="language">
-                    <option value="en">English</option>
-                    <option value="fr">Français</option>
-                </select>
+                <label for="speed">⚡ 再生速度</label>
+                <input type="range" id="speed" min="0.5" max="2.0" step="0.1" value="1.0">
+                <div class="speed-display">1.0x</div>
             </div>
         </div>
 
@@ -315,10 +315,9 @@
             }
         ];
 
-        let currentAudio = null;
+        let currentUtterance = null;
         let currentIndex = 0;
         let selectedSentences = [];
-        let isPlaying = false;
 
         function initializeSentenceList() {
             const listContainer = document.getElementById('sentenceList');
@@ -343,6 +342,10 @@
             });
         }
 
+        document.getElementById('speed').addEventListener('input', function() {
+            document.querySelector('.speed-display').textContent = this.value + 'x';
+        });
+
         function selectAll() {
             document.querySelectorAll('.sentence-list input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = true;
@@ -353,11 +356,6 @@
             document.querySelectorAll('.sentence-list input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = false;
             });
-        }
-
-        function getGoogleTranslateAudioUrl(text, language) {
-            const encodedText = encodeURIComponent(text);
-            return `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${language}&client=tw-ob`;
         }
 
         function playSelected() {
@@ -376,7 +374,6 @@
             });
 
             currentIndex = 0;
-            isPlaying = true;
             playNext();
         }
 
@@ -384,12 +381,15 @@
             if (currentIndex >= selectedSentences.length) {
                 updateStatus('再生完了');
                 removeAllPlayingHighlight();
-                isPlaying = false;
                 return;
             }
 
             const sentence = selectedSentences[currentIndex];
-            const language = document.getElementById('language').value;
+            const speed = parseFloat(document.getElementById('speed').value);
+
+            currentUtterance = new SpeechSynthesisUtterance(sentence.text);
+            currentUtterance.lang = 'en-US';
+            currentUtterance.rate = speed;
 
             removeAllPlayingHighlight();
             const item = document.getElementById(`item-${sentence.id}`);
@@ -399,37 +399,25 @@
 
             updateStatus(`再生中: ${currentIndex + 1} / ${selectedSentences.length}`);
 
-            const audioUrl = getGoogleTranslateAudioUrl(sentence.text, language);
-
-            currentAudio = new Audio();
-            currentAudio.src = audioUrl;
-
-            currentAudio.onended = () => {
+            currentUtterance.onend = () => {
                 currentIndex++;
                 playNext();
             };
 
-            currentAudio.onerror = () => {
-                console.error('Audio playback error');
+            currentUtterance.onerror = (event) => {
+                console.error('Speech synthesis error:', event);
                 updateStatus('エラーが発生しました');
                 currentIndex++;
                 playNext();
             };
 
-            currentAudio.play().catch(err => {
-                console.error('Play error:', err);
-                updateStatus('再生に失敗しました');
-                currentIndex++;
-                playNext();
-            });
+            window.speechSynthesis.speak(currentUtterance);
         }
 
         function stopSpeaking() {
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
             }
-            isPlaying = false;
             removeAllPlayingHighlight();
             updateStatus('停止しました');
         }

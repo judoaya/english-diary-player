@@ -62,7 +62,7 @@
             font-size: 14px;
         }
 
-        select, input[type="range"] {
+        select {
             width: 100%;
             padding: 10px;
             border: 2px solid #e0e0e0;
@@ -74,19 +74,6 @@
         select:focus {
             outline: none;
             border-color: #667eea;
-        }
-
-        input[type="range"] {
-            padding: 0;
-            height: 40px;
-        }
-
-        .speed-display {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #667eea;
-            margin-top: 5px;
         }
 
         .button-group {
@@ -225,7 +212,6 @@
             }
         }
 
-        /* スクロールバーのスタイル */
         .sentence-list::-webkit-scrollbar {
             width: 10px;
         }
@@ -248,22 +234,15 @@
 <body>
     <div class="container">
         <h1>📖 English Diary Shadowing Player</h1>
-        <p class="subtitle">音声合成でシャドーイング練習</p>
+        <p class="subtitle">Google翻訳の音声でシャドーイング練習</p>
 
         <div class="controls">
             <div class="control-group">
                 <label for="language">🌐 言語</label>
                 <select id="language">
-                    <option value="en-GB">English (UK)</option>
-                    <option value="en-US">English (US)</option>
-                    <option value="fr-FR">Français (フランス語)</option>
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
                 </select>
-            </div>
-
-            <div class="control-group">
-                <label for="speed">⚡ 再生速度</label>
-                <input type="range" id="speed" min="0.5" max="2.0" step="0.1" value="1.0">
-                <div class="speed-display">1.0x</div>
             </div>
         </div>
 
@@ -283,7 +262,6 @@
     </div>
 
     <script>
-        // サンプルデータ（実際のNotionデータに置き換え可能）
         const sentences = [
             {
                 id: "1",
@@ -337,11 +315,11 @@
             }
         ];
 
-        let currentUtterance = null;
+        let currentAudio = null;
         let currentIndex = 0;
         let selectedSentences = [];
+        let isPlaying = false;
 
-        // 画面初期化
         function initializeSentenceList() {
             const listContainer = document.getElementById('sentenceList');
             listContainer.innerHTML = '';
@@ -365,31 +343,26 @@
             });
         }
 
-        // 速度表示の更新
-        document.getElementById('speed').addEventListener('input', function() {
-            document.querySelector('.speed-display').textContent = this.value + 'x';
-        });
-
-        // すべて選択
         function selectAll() {
             document.querySelectorAll('.sentence-list input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = true;
             });
         }
 
-        // 選択解除
         function deselectAll() {
             document.querySelectorAll('.sentence-list input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = false;
             });
         }
 
-        // 選択された文章を再生
+        function getGoogleTranslateAudioUrl(text, language) {
+            const encodedText = encodeURIComponent(text);
+            return `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${language}&client=tw-ob`;
+        }
+
         function playSelected() {
-            // 現在の再生を停止
             stopSpeaking();
 
-            // 選択されたチェックボックスを取得
             const checkboxes = document.querySelectorAll('.sentence-list input[type="checkbox"]:checked');
             
             if (checkboxes.length === 0) {
@@ -397,34 +370,27 @@
                 return;
             }
 
-            // 選択された文章を収集
             selectedSentences = Array.from(checkboxes).map(cb => {
                 const sentence = sentences.find(s => s.id === cb.value);
                 return sentence;
             });
 
             currentIndex = 0;
+            isPlaying = true;
             playNext();
         }
 
-        // 次の文章を再生
         function playNext() {
             if (currentIndex >= selectedSentences.length) {
                 updateStatus('再生完了');
                 removeAllPlayingHighlight();
+                isPlaying = false;
                 return;
             }
 
             const sentence = selectedSentences[currentIndex];
             const language = document.getElementById('language').value;
-            const speed = parseFloat(document.getElementById('speed').value);
 
-            // Web Speech API
-            currentUtterance = new SpeechSynthesisUtterance(sentence.text);
-            currentUtterance.lang = language;
-            currentUtterance.rate = speed;
-
-            // ハイライト表示
             removeAllPlayingHighlight();
             const item = document.getElementById(`item-${sentence.id}`);
             if (item) {
@@ -433,40 +399,47 @@
 
             updateStatus(`再生中: ${currentIndex + 1} / ${selectedSentences.length}`);
 
-            // 再生終了時に次へ
-            currentUtterance.onend = () => {
+            const audioUrl = getGoogleTranslateAudioUrl(sentence.text, language);
+
+            currentAudio = new Audio();
+            currentAudio.src = audioUrl;
+
+            currentAudio.onended = () => {
                 currentIndex++;
                 playNext();
             };
 
-            // エラーハンドリング
-            currentUtterance.onerror = (event) => {
-                console.error('Speech synthesis error:', event);
+            currentAudio.onerror = () => {
+                console.error('Audio playback error');
                 updateStatus('エラーが発生しました');
                 currentIndex++;
                 playNext();
             };
 
-            window.speechSynthesis.speak(currentUtterance);
+            currentAudio.play().catch(err => {
+                console.error('Play error:', err);
+                updateStatus('再生に失敗しました');
+                currentIndex++;
+                playNext();
+            });
         }
 
-        // 再生停止
         function stopSpeaking() {
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
             }
+            isPlaying = false;
             removeAllPlayingHighlight();
             updateStatus('停止しました');
         }
 
-        // ハイライトをすべて削除
         function removeAllPlayingHighlight() {
             document.querySelectorAll('.sentence-item').forEach(item => {
                 item.classList.remove('playing');
             });
         }
 
-        // ステータス更新
         function updateStatus(message) {
             const statusEl = document.getElementById('status');
             statusEl.textContent = message;
@@ -478,7 +451,6 @@
             }
         }
 
-        // 初期化
         initializeSentenceList();
     </script>
 </body>

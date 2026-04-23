@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Diary Shadowing Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="range"] {
+            padding: 0;
+            height: 40px;
+        }
+
+        .speed-display {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-play:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-stop {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-select-all, .btn-deselect-all {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-select-all:hover, .btn-deselect-all:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        .sentence-list {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .sentence-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .sentence-item:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .sentence-item.playing {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border-color: #667eea;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .sentence-item label {
+            display: flex;
+            align-items: start;
+            cursor: pointer;
+            font-weight: normal;
+            margin: 0;
+        }
+
+        .sentence-item input[type="checkbox"] {
+            margin-right: 12px;
+            margin-top: 3px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .sentence-text {
+            flex: 1;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .sentence-date {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .status.playing {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        /* スクロールバーのスタイル */
+        .sentence-list::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .sentence-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .sentence-list::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .sentence-list::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📖 English Diary Shadowing Player</h1>
+        <p class="subtitle">音声合成でシャドーイング練習</p>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="language">🌐 言語</label>
+                <select id="language">
+                    <option value="en-GB">English (UK)</option>
+                    <option value="en-US">English (US)</option>
+                    <option value="fr-FR">Français (フランス語)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="speed">⚡ 再生速度</label>
+                <input type="range" id="speed" min="0.5" max="2.0" step="0.1" value="1.0">
+                <div class="speed-display">1.0x</div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-select-all" onclick="selectAll()">すべて選択</button>
+            <button class="btn-deselect-all" onclick="deselectAll()">選択解除</button>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-play" onclick="playSelected()">▶ 再生</button>
+            <button class="btn-stop" onclick="stopSpeaking()">⏹ 停止</button>
+        </div>
+
+        <div id="status" class="status">選択した文章を再生できます</div>
+
+        <div class="sentence-list" id="sentenceList"></div>
+    </div>
+
+    <script>
+        // サンプルデータ（実際のNotionデータに置き換え可能）
+        const sentences = [
+            {
+                id: "1",
+                text: "The pay is frustrating.",
+                date: "2026-04-22"
+            },
+            {
+                id: "2",
+                text: "I also worked from home via the internet in the evening.",
+                date: "2026-04-22"
+            },
+            {
+                id: "3",
+                text: "It really made me feel how unequal the world is.",
+                date: "2026-04-22"
+            },
+            {
+                id: "4",
+                text: "After work, I went shopping at Don Quixote for the first time in about half a year.",
+                date: "2026-04-22"
+            },
+            {
+                id: "5",
+                text: "Last night there was heavy rain until morning, and I had a nightmare about a tsunami and almost drowning.",
+                date: "2026-04-22"
+            },
+            {
+                id: "6",
+                text: "It was the same job as yesterday: taking screenshots from an auction site.",
+                date: "2026-04-22"
+            },
+            {
+                id: "7",
+                text: "The site specializes in high-end brand bags, and some secondhand ones go for 100,000 yen or more.",
+                date: "2026-04-22"
+            },
+            {
+                id: "8",
+                text: "Today the weather was nice, but it was very windy—the opening of spring.",
+                date: "2026-04-22"
+            },
+            {
+                id: "9",
+                text: "It was terrible.",
+                date: "2026-04-22"
+            },
+            {
+                id: "10",
+                text: "Still, since I'm working at minimum wage, I can't complain.",
+                date: "2026-04-22"
+            }
+        ];
+
+        let currentUtterance = null;
+        let currentIndex = 0;
+        let selectedSentences = [];
+
+        // 画面初期化
+        function initializeSentenceList() {
+            const listContainer = document.getElementById('sentenceList');
+            listContainer.innerHTML = '';
+
+            sentences.forEach((sentence, index) => {
+                const item = document.createElement('div');
+                item.className = 'sentence-item';
+                item.id = `item-${sentence.id}`;
+
+                item.innerHTML = `
+                    <label>
+                        <input type="checkbox" id="checkbox-${sentence.id}" value="${sentence.id}">
+                        <div>
+                            <div class="sentence-text">${sentence.text}</div>
+                            <div class="sentence-date">${sentence.date}</div>
+                        </div>
+                    </label>
+                `;
+
+                listContainer.appendChild(item);
+            });
+        }
+
+        // 速度表示の更新
+        document.getElementById('speed').addEventListener('input', function() {
+            document.querySelector('.speed-display').textContent = this.value + 'x';
+        });
+
+        // すべて選択
+        function selectAll() {
+            document.querySelectorAll('.sentence-list input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        }
+
+        // 選択解除
+        function deselectAll() {
+            document.querySelectorAll('.sentence-list input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
+
+        // 選択された文章を再生
+        function playSelected() {
+            // 現在の再生を停止
+            stopSpeaking();
+
+            // 選択されたチェックボックスを取得
+            const checkboxes = document.querySelectorAll('.sentence-list input[type="checkbox"]:checked');
+            
+            if (checkboxes.length === 0) {
+                updateStatus('文章を選択してください');
+                return;
+            }
+
+            // 選択された文章を収集
+            selectedSentences = Array.from(checkboxes).map(cb => {
+                const sentence = sentences.find(s => s.id === cb.value);
+                return sentence;
+            });
+
+            currentIndex = 0;
+            playNext();
+        }
+
+        // 次の文章を再生
+        function playNext() {
+            if (currentIndex >= selectedSentences.length) {
+                updateStatus('再生完了');
+                removeAllPlayingHighlight();
+                return;
+            }
+
+            const sentence = selectedSentences[currentIndex];
+            const language = document.getElementById('language').value;
+            const speed = parseFloat(document.getElementById('speed').value);
+
+            // Web Speech API
+            currentUtterance = new SpeechSynthesisUtterance(sentence.text);
+            currentUtterance.lang = language;
+            currentUtterance.rate = speed;
+
+            // ハイライト表示
+            removeAllPlayingHighlight();
+            const item = document.getElementById(`item-${sentence.id}`);
+            if (item) {
+                item.classList.add('playing');
+            }
+
+            updateStatus(`再生中: ${currentIndex + 1} / ${selectedSentences.length}`);
+
+            // 再生終了時に次へ
+            currentUtterance.onend = () => {
+                currentIndex++;
+                playNext();
+            };
+
+            // エラーハンドリング
+            currentUtterance.onerror = (event) => {
+                console.error('Speech synthesis error:', event);
+                updateStatus('エラーが発生しました');
+                currentIndex++;
+                playNext();
+            };
+
+            window.speechSynthesis.speak(currentUtterance);
+        }
+
+        // 再生停止
+        function stopSpeaking() {
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+            removeAllPlayingHighlight();
+            updateStatus('停止しました');
+        }
+
+        // ハイライトをすべて削除
+        function removeAllPlayingHighlight() {
+            document.querySelectorAll('.sentence-item').forEach(item => {
+                item.classList.remove('playing');
+            });
+        }
+
+        // ステータス更新
+        function updateStatus(message) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            
+            if (message.includes('再生中')) {
+                statusEl.classList.add('playing');
+            } else {
+                statusEl.classList.remove('playing');
+            }
+        }
+
+        // 初期化
+        initializeSentenceList();
+    </script>
+</body>
+</html>

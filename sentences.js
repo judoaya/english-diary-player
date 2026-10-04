@@ -42,7 +42,7 @@ const SENTENCES = [
   { en: "How are you feeling right now?", ja: "今の気持ちはどうですか？", cat: "取材" },
   { en: "What was going through your mind in the final?", ja: "決勝では何を考えていましたか？", cat: "取材" },
   { en: "How did you prepare for this tournament?", ja: "この大会に向けてどう準備しましたか？", cat: "取材" },
-  { en: "Was it difficult to travel straight from the Asian Games?", ja: "アジア大会から直行するのは大変でしたか？", cat: "取材" },
+  { en: "Was it hard to make weight for this tournament?", ja: "この大会に向けての減量は大変でしたか？", cat: "取材" },
   { en: "Who would you like to thank today?", ja: "今日は誰に感謝したいですか？", cat: "取材" },
   { en: "Could you say a few words to your fans in Japan?", ja: "日本のファンにひと言お願いできますか？", cat: "取材" },
   { en: "Thank you so much, and good luck tomorrow.", ja: "ありがとうございました、明日も頑張ってください。", cat: "取材" },
@@ -53,7 +53,7 @@ const SENTENCES = [
   { en: "Sorry, my English isn't perfect.", ja: "すみません、英語が完璧ではなくて。", cat: "聞き返し", keep: true },
 
   // --- 確認 ---
-  { en: "Do you mean the women's team or the men's team?", ja: "女子チームのことですか、男子チームのことですか？", cat: "確認" },
+  { en: "So I should come back here at three o'clock, right?", ja: "じゃあ、3時にここに戻ってくればいいんですね？", cat: "確認" },
   { en: "Just to check, is that today or tomorrow?", ja: "念のため、それは今日ですか明日ですか？", cat: "確認" },
   { en: "How do you spell your name?", ja: "お名前のつづりを教えてもらえますか？", cat: "確認", keep: true },
   { en: "I'm not sure I understood. Could you write it down?", ja: "よく分からなかったので、書いてもらえますか？", cat: "確認", keep: true },
@@ -67,7 +67,7 @@ const SENTENCES = [
   { en: "I'm a big fan of the Georgian team.", ja: "ジョージアチームの大ファンなんです。", cat: "雑談" },
   { en: "Have you been to Astana before?", ja: "アスタナには前に来たことがありますか？", cat: "雑談" },
   { en: "It's my first time in Kazakhstan.", ja: "カザフスタンは初めてです。", cat: "雑談" },
-  { en: "I'm from Akita, in the north of Japan.", ja: "日本の北にある秋田の出身です。", cat: "雑談", keep: true },
+  { en: "I'm originally from near Tokyo, but now I live in Akita, in the north of Japan.", ja: "東京の近くの出身で、今は日本の北にある秋田に住んでいます。", cat: "雑談", keep: true },
   { en: "You must be exhausted after such a long day.", ja: "長い一日で疲れたでしょう。", cat: "雑談" },
 
   // --- 締め ---

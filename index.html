@@ -15,6 +15,7 @@
   html, body { margin: 0; background: var(--bg); color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Segoe UI", sans-serif; }
   body { padding: 16px 16px calc(24px + env(safe-area-inset-bottom)); max-width: 720px; margin: 0 auto; }
+  .week { color: var(--sub); font-size: 13px; margin: -6px 0 12px; }
   h1 { font-size: 18px; margin: 4px 0 12px; color: var(--sub); font-weight: 600; }
 
   .now { background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
@@ -51,6 +52,10 @@
   .item .t { font-size: 15px; }
   .item .s { font-size: 13px; color: var(--sub); margin-top: 2px; }
   .item.cur { background: rgba(79,179,255,0.12); border-radius: 8px; }
+  .item .done { flex-shrink: 0; align-self: center; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--sub); font-size: 13px; cursor: pointer; }
+  .item .done.on { background: #2e7d4f; border-color: #2e7d4f; color: #fff; font-weight: 700; }
+  .donebar { display: flex; justify-content: space-between; align-items: center; padding: 0 16px 10px; color: var(--sub); font-size: 14px; }
   .note { color: var(--sub); font-size: 13px; line-height: 1.6; margin-top: 8px; }
   .warn { color: var(--accent2); }
 </style>
@@ -58,6 +63,7 @@
 <body>
 
 <h1>Shadowing Player｜アスタナ取材用</h1>
+<div class="week" id="week"></div>
 
 <div class="now">
   <div class="meta"><span id="pos">– / –</span><span class="phase" id="phase">停止中</span></div>
@@ -82,6 +88,8 @@
         <option value="after">英語の後に読む</option>
         <option value="off">読まない</option>
       </select></div>
+    <div class="row"><label>英語の前に考える間</label>
+      <select id="think"><option value="0">なし</option><option value="2">2秒</option><option value="3">3秒</option><option value="5">5秒</option></select></div>
     <div class="row"><label>1文の繰り返し</label>
       <select id="repeat"><option>1</option><option>2</option><option>3</option><option>5</option></select></div>
     <div class="row"><label>シャドーイングの間</label><input type="range" id="gap" min="0.5" max="2.5" step="0.1"><span class="val" id="gapV"></span></div>
@@ -89,12 +97,15 @@
       <select id="order"><option value="seq">順番どおり</option><option value="shuffle">シャッフル</option></select></div>
     <div class="row"><label>最後まで行ったら</label>
       <select id="loop"><option value="1">最初に戻ってくり返す</option><option value="0">止まる</option></select></div>
+    <div class="row"><label>「覚えた」文</label>
+      <select id="skipDone"><option value="0">再生する</option><option value="1">飛ばす</option></select></div>
     <div>
       <div class="row" style="margin-bottom:8px"><label>場面で絞り込み</label></div>
       <div class="chips" id="chips"></div>
     </div>
     <div class="note">
       シャドーイングの間は「英文の長さ × この倍率」で自動で決まります。1.0倍なら英文と同じ長さの間が空きます。<br>
+      「英語の前に考える間」は、日本語訳のあとに自分で英語を言ってみる時間です（覚えたかどうかの確認用）。<br>
       <span class="warn">設定や選曲は停車中に。運転中は画面に触らず、音声だけで使ってください。</span>
     </div>
   </div>
@@ -102,262 +113,18 @@
 
 <details>
   <summary>📝 文の一覧（タップでその文から再生）</summary>
+  <div class="donebar"><span id="doneCount"></span><button id="copyDone" class="chip">覚えた文をコピー</button></div>
   <div class="list" id="list"></div>
 </details>
 
+<script src="sentences.js"></script>
 <script>
-const SENTENCES = [
-{
-"en": "Hi Robin, it's lovely to finally meet you in person.",
-"cat": "挨拶",
-"ja": "ロビン、やっと直接会えてうれしいです。"
-},
-{
-"en": "I'm Aya, from ejudo in Japan.",
-"cat": "自己紹介",
-"ja": "日本のejudoのアヤです。"
-},
-{
-"en": "I write a weekly column about overseas judo players.",
-"cat": "自己紹介",
-"ja": "海外の柔道選手について週一でコラムを書いています。"
-},
-{
-"en": "This is my first time covering a World Championships.",
-"cat": "自己紹介",
-"ja": "世界選手権の取材は今回が初めてです。"
-},
-{
-"en": "I'm not a judo expert, I'm just a huge fan.",
-"cat": "自己紹介",
-"ja": "柔道の専門家ではなく、ただの大ファンです。"
-},
-{
-"en": "I've been watching JudoTV almost every day since 2020.",
-"cat": "自己紹介",
-"ja": "2020年からほぼ毎日JUDO TVを見ています。"
-},
-{
-"en": "Thank you so much for your help with my accreditation.",
-"cat": "お礼",
-"ja": "取材証の件で助けていただき本当にありがとうございます。"
-},
-{
-"en": "Thanks for the email last week. It was really helpful.",
-"cat": "お礼",
-"ja": "先週のメールありがとう。とても助かりました。"
-},
-{
-"en": "Where can I pick up my media pass?",
-"cat": "仕事",
-"ja": "メディアパスはどこで受け取れますか？"
-},
-{
-"en": "Could you tell me where the mixed zone is?",
-"cat": "仕事",
-"ja": "ミックスゾーンはどこか教えてもらえますか？"
-},
-{
-"en": "What time does the final block start today?",
-"cat": "仕事",
-"ja": "今日の決勝ブロックは何時に始まりますか？"
-},
-{
-"en": "Is it okay if I record the interview?",
-"cat": "仕事",
-"ja": "インタビューを録音してもいいですか？"
-},
-{
-"en": "Am I allowed to take photos from here?",
-"cat": "仕事",
-"ja": "ここから写真を撮ってもいいですか？"
-},
-{
-"en": "Is there Wi-Fi in the media centre?",
-"cat": "仕事",
-"ja": "メディアセンターにWi-Fiはありますか？"
-},
-{
-"en": "Could I possibly speak to him after the medal ceremony?",
-"cat": "仕事",
-"ja": "表彰式の後に彼と話すことはできますか？"
-},
-{
-"en": "Would you be able to help me with translation?",
-"cat": "仕事",
-"ja": "通訳を手伝ってもらえますか？"
-},
-{
-"en": "I'll send you the article once it's published.",
-"cat": "仕事",
-"ja": "記事が公開されたらお送りします。"
-},
-{
-"en": "Let me know if there's anything I should be careful about.",
-"cat": "仕事",
-"ja": "気をつけるべきことがあれば教えてください。"
-},
-{
-"en": "Excuse me, do you have a minute for a quick interview?",
-"cat": "取材",
-"ja": "すみません、少しインタビューの時間をいただけますか？"
-},
-{
-"en": "It'll only take two or three minutes.",
-"cat": "取材",
-"ja": "2、3分で終わります。"
-},
-{
-"en": "I'm writing for Japanese judo fans.",
-"cat": "取材",
-"ja": "日本の柔道ファン向けに書いています。"
-},
-{
-"en": "You have a lot of fans in Japan.",
-"cat": "取材",
-"ja": "日本にはあなたのファンがたくさんいます。"
-},
-{
-"en": "Congratulations on your medal!",
-"cat": "取材",
-"ja": "メダルおめでとうございます！"
-},
-{
-"en": "How are you feeling right now?",
-"cat": "取材",
-"ja": "今の気持ちはどうですか？"
-},
-{
-"en": "What was going through your mind in the final?",
-"cat": "取材",
-"ja": "決勝では何を考えていましたか？"
-},
-{
-"en": "How did you prepare for this tournament?",
-"cat": "取材",
-"ja": "この大会に向けてどう準備しましたか？"
-},
-{
-"en": "Was it difficult to travel straight from the Asian Games?",
-"cat": "取材",
-"ja": "アジア大会から直行するのは大変でしたか？"
-},
-{
-"en": "Who would you like to thank today?",
-"cat": "取材",
-"ja": "今日は誰に感謝したいですか？"
-},
-{
-"en": "Could you say a few words to your fans in Japan?",
-"cat": "取材",
-"ja": "日本のファンにひと言お願いできますか？"
-},
-{
-"en": "Thank you so much, and good luck tomorrow.",
-"cat": "取材",
-"ja": "ありがとうございました、明日も頑張ってください。"
-},
-{
-"en": "Sorry, could you say that again?",
-"cat": "聞き返し",
-"ja": "すみません、もう一度言ってもらえますか？"
-},
-{
-"en": "Could you speak a little more slowly, please?",
-"cat": "聞き返し",
-"ja": "もう少しゆっくり話してもらえますか？"
-},
-{
-"en": "Sorry, my English isn't perfect.",
-"cat": "聞き返し",
-"ja": "すみません、英語が完璧ではなくて。"
-},
-{
-"en": "Do you mean the women's team or the men's team?",
-"cat": "確認",
-"ja": "女子チームのことですか、男子チームのことですか？"
-},
-{
-"en": "Just to check, is that today or tomorrow?",
-"cat": "確認",
-"ja": "念のため、それは今日ですか明日ですか？"
-},
-{
-"en": "How do you spell your name?",
-"cat": "確認",
-"ja": "お名前のつづりを教えてもらえますか？"
-},
-{
-"en": "I'm not sure I understood. Could you write it down?",
-"cat": "確認",
-"ja": "よく分からなかったので、書いてもらえますか？"
-},
-{
-"en": "The atmosphere in the arena is amazing.",
-"cat": "雑談",
-"ja": "会場の雰囲気がすごいですね。"
-},
-{
-"en": "The Kazakh fans are so loud!",
-"cat": "雑談",
-"ja": "カザフスタンのファンの応援はすごい音量ですね！"
-},
-{
-"en": "That was one of the best matches I've ever seen.",
-"cat": "雑談",
-"ja": "今まで見た中で最高の試合のひとつでした。"
-},
-{
-"en": "I didn't expect that result at all.",
-"cat": "雑談",
-"ja": "あの結果はまったく予想していませんでした。"
-},
-{
-"en": "Who do you think will win the mixed team event?",
-"cat": "雑談",
-"ja": "混合団体はどこが勝つと思いますか？"
-},
-{
-"en": "I'm a big fan of the Georgian team.",
-"cat": "雑談",
-"ja": "ジョージアチームの大ファンなんです。"
-},
-{
-"en": "Have you been to Astana before?",
-"cat": "雑談",
-"ja": "アスタナには前に来たことがありますか？"
-},
-{
-"en": "It's my first time in Kazakhstan.",
-"cat": "雑談",
-"ja": "カザフスタンは初めてです。"
-},
-{
-"en": "I'm from Akita, in the north of Japan.",
-"cat": "雑談",
-"ja": "日本の北にある秋田の出身です。"
-},
-{
-"en": "You must be exhausted after such a long day.",
-"cat": "雑談",
-"ja": "長い一日で疲れたでしょう。"
-},
-{
-"en": "I really enjoyed working with you this week.",
-"cat": "締め",
-"ja": "今週一緒に仕事ができて本当に楽しかったです。"
-},
-{
-"en": "I hope to see you again at the Tokyo Grand Slam.",
-"cat": "締め",
-"ja": "東京グランドスラムでまた会えるといいですね。"
-},
-{
-"en": "Take care, and have a safe trip home.",
-"cat": "締め",
-"ja": "お元気で、気をつけて帰ってください。"
+if (typeof SENTENCES === 'undefined' || !SENTENCES.length) {
+  document.getElementById('en').textContent = 'sentences.js が読み込めませんでした';
+  document.getElementById('ja').textContent = 'index.html と同じ場所に sentences.js があるか、書き方（カンマや " ）に誤りがないか確認してください。';
+  throw new Error('SENTENCES not loaded');
 }
-];
+if (typeof SENTENCES_WEEK !== 'undefined') document.getElementById('week').textContent = SENTENCES_WEEK;
 
 // ---------- 設定の保存（使えない環境でも動くように） ----------
 const STORE_KEY = 'shadowing-astana-settings';
@@ -369,8 +136,18 @@ function saveSettings() {
 }
 const S = Object.assign({
   voice: '', rate: 0.85, jaMode: 'before', repeat: '2', gap: 1.2,
-  order: 'seq', loop: '1', cats: []
+  order: 'seq', loop: '1', cats: [], think: '2', skipDone: '0'
 }, loadSettings());
+
+// ---------- 「覚えた」印（英文をキーに、この端末だけに保存） ----------
+const DONE_KEY = 'shadowing-astana-done';
+let DONE = [];
+try { DONE = JSON.parse(localStorage.getItem(DONE_KEY)) || []; } catch (e) { DONE = []; }
+const isDone = s => DONE.includes(s.en);
+function toggleDone(s) {
+  DONE = isDone(s) ? DONE.filter(x => x !== s.en) : [...DONE, s.en];
+  try { localStorage.setItem(DONE_KEY, JSON.stringify(DONE)); } catch (e) {}
+}
 
 // ---------- 要素 ----------
 const $ = id => document.getElementById(id);
@@ -470,7 +247,12 @@ async function runFrom(myRun) {
       show(idx, '日本語');
       await speak(s.ja, 'ja-JP', 1.0, myRun);
       if (myRun !== runId) return;
-      await wait(0.6, myRun);
+      if (Number(S.think) > 0) {
+        show(idx, '💭 英語で言ってみて');
+        await wait(Number(S.think), myRun);
+      } else {
+        await wait(0.6, myRun);
+      }
     }
 
     const reps = Number(S.repeat);
@@ -498,6 +280,7 @@ async function runFrom(myRun) {
 function buildQueue(reshuffle) {
   const cats = S.cats;
   let list = SENTENCES.map((s, i) => i).filter(i => !cats.length || cats.includes(SENTENCES[i].cat));
+  if (S.skipDone === '1') { const rest = list.filter(i => !isDone(SENTENCES[i])); if (rest.length) list = rest; }
   if (!list.length) list = SENTENCES.map((s, i) => i);
   if (S.order === 'shuffle' && reshuffle !== false) {
     for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
@@ -565,6 +348,9 @@ bindSetting('gap', 'gap', v => Number(v).toFixed(1) + '倍');
 bindSetting('jaMode', 'jaMode');
 bindSetting('repeat', 'repeat');
 bindSetting('loop', 'loop');
+bindSetting('think', 'think');
+$('skipDone').value = S.skipDone;
+$('skipDone').addEventListener('change', e => { S.skipDone = e.target.value; saveSettings(); buildQueue(); qi = 0; });
 $('order').value = S.order;
 $('order').addEventListener('change', e => { S.order = e.target.value; saveSettings(); buildQueue(); qi = 0; });
 
@@ -600,9 +386,13 @@ function renderList() {
     const d = document.createElement('div');
     d.className = 'item';
     d.dataset.i = i;
-    d.innerHTML = '<div class="n">' + (i + 1) + '</div><div><div class="t"></div><div class="s"></div></div>';
+    d.innerHTML = '<div class="n">' + (i + 1) + '</div><div style="flex:1"><div class="t"></div><div class="s"></div></div><button class="done"></button>';
     d.querySelector('.t').textContent = s.en;
-    d.querySelector('.s').textContent = '【' + s.cat + '】' + s.ja;
+    d.querySelector('.s').textContent = '【' + s.cat + '】' + s.ja + (s.keep ? '　📌固定' : '');
+    const btn = d.querySelector('.done');
+    const paint = () => { btn.classList.toggle('on', isDone(s)); btn.textContent = isDone(s) ? '✓ 覚えた' : '覚えた？'; };
+    paint();
+    btn.onclick = ev => { ev.stopPropagation(); toggleDone(s); paint(); updateDoneCount(); if (S.skipDone === '1') { buildQueue(); qi = 0; } };
     d.onclick = () => {
       S.cats = []; saveSettings(); renderChips();
       S.order = 'seq'; $('order').value = 'seq';
@@ -614,8 +404,22 @@ function renderList() {
   });
 }
 
+// 覚えた文の数とコピー（毎週の入れ替え相談用）
+function updateDoneCount() {
+  const n = SENTENCES.filter(isDone).length;
+  $('doneCount').textContent = '覚えた文：' + n + ' / ' + SENTENCES.length;
+}
+$('copyDone').onclick = async () => {
+  const list = SENTENCES.filter(isDone).map(s => s.en + (s.keep ? ' (固定)' : '')).join('\n');
+  const text = '【覚えた文】\n' + (list || '（なし）');
+  try { await navigator.clipboard.writeText(text); $('copyDone').textContent = 'コピーしました'; }
+  catch (e) { prompt('この文をコピーしてください', text); }
+  setTimeout(() => { $('copyDone').textContent = '覚えた文をコピー'; }, 2000);
+};
+
 renderChips();
 renderList();
+updateDoneCount();
 buildQueue();
 
 if (!('speechSynthesis' in window)) {

@@ -1,445 +1,627 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Diary Shadowing Player</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#111418">
+<title>Shadowing Player</title>
+<style>
+  :root {
+    --bg: #111418; --panel: #1b2027; --line: #2a313b;
+    --text: #f2f4f7; --sub: #9aa4b2; --accent: #4fb3ff; --accent2: #ffb84f;
+    --danger: #ff6b6b;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Segoe UI", sans-serif; }
+  body { padding: 16px 16px calc(24px + env(safe-area-inset-bottom)); max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 18px; margin: 4px 0 12px; color: var(--sub); font-weight: 600; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+  .now { background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+    padding: 20px; min-height: 230px; display: flex; flex-direction: column; justify-content: center; }
+  .meta { display: flex; justify-content: space-between; color: var(--sub); font-size: 14px; margin-bottom: 12px; }
+  .phase { color: var(--accent2); font-weight: 700; }
+  .en { font-size: 28px; line-height: 1.35; font-weight: 700; }
+  .ja { font-size: 18px; color: var(--sub); margin-top: 12px; line-height: 1.5; }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
+  .controls { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 12px; margin: 16px 0; }
+  .controls button { height: 88px; font-size: 30px; border-radius: 18px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--text); cursor: pointer; }
+  .controls button#playBtn { background: var(--accent); color: #06121c; border: none; font-weight: 800; font-size: 26px; }
+  .controls button#playBtn.playing { background: var(--danger); color: #fff; }
+  .controls button:active { transform: scale(0.97); }
 
-        h1 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
+  details { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 12px; }
+  summary { padding: 14px 16px; font-size: 16px; font-weight: 600; cursor: pointer; }
+  .settings { padding: 4px 16px 16px; display: grid; gap: 14px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; }
+  .row label { color: var(--sub); flex-shrink: 0; }
+  select, input[type=range] { flex: 1; max-width: 60%; }
+  select { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px; font-size: 15px; }
+  .val { min-width: 48px; text-align: right; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 8px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg);
+    color: var(--sub); font-size: 14px; cursor: pointer; }
+  .chip.on { background: var(--accent); color: #06121c; border-color: var(--accent); font-weight: 700; }
 
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
-        .controls {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-        }
-
-        .control-group {
-            margin-bottom: 20px;
-        }
-
-        .control-group:last-child {
-            margin-bottom: 0;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #333;
-            font-size: 14px;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 40px;
-            padding: 0;
-            border: none;
-            border-radius: 8px;
-        }
-
-        .speed-display {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #667eea;
-            margin-top: 5px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        button {
-            flex: 1;
-            padding: 15px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-play {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .btn-play:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-stop {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-stop:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-        }
-
-        .btn-select-all, .btn-deselect-all {
-            background: #95a5a6;
-            color: white;
-        }
-
-        .btn-select-all:hover, .btn-deselect-all:hover {
-            background: #7f8c8d;
-            transform: translateY(-2px);
-        }
-
-        .sentence-list {
-            max-height: 500px;
-            overflow-y: auto;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 15px;
-        }
-
-        .sentence-item {
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            background: #f8f9fa;
-            transition: all 0.3s;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .sentence-item:hover {
-            background: #e9ecef;
-            border-color: #667eea;
-        }
-
-        .sentence-item.playing {
-            background: linear-gradient(135deg, #667eea15, #764ba215);
-            border-color: #667eea;
-            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
-        }
-
-        .sentence-item label {
-            display: flex;
-            align-items: start;
-            cursor: pointer;
-            font-weight: normal;
-            margin: 0;
-        }
-
-        .sentence-item input[type="checkbox"] {
-            margin-right: 12px;
-            margin-top: 3px;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .sentence-text {
-            flex: 1;
-            line-height: 1.6;
-            color: #333;
-        }
-
-        .sentence-date {
-            font-size: 12px;
-            color: #999;
-            margin-top: 5px;
-            font-style: italic;
-        }
-
-        .status {
-            text-align: center;
-            padding: 15px;
-            background: #e8f4f8;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 500;
-            color: #2c3e50;
-        }
-
-        .status.playing {
-            background: #d5f4e6;
-            color: #27ae60;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-        }
-
-        .sentence-list::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .sentence-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .sentence-list::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 10px;
-        }
-
-        .sentence-list::-webkit-scrollbar-thumb:hover {
-            background: #764ba2;
-        }
-    </style>
+  .list { padding: 0 8px 8px; }
+  .item { display: flex; gap: 10px; padding: 10px 8px; border-top: 1px solid var(--line); cursor: pointer; }
+  .item:first-child { border-top: none; }
+  .item .n { color: var(--sub); width: 28px; flex-shrink: 0; text-align: right; font-size: 13px; padding-top: 2px; }
+  .item .t { font-size: 15px; }
+  .item .s { font-size: 13px; color: var(--sub); margin-top: 2px; }
+  .item.cur { background: rgba(79,179,255,0.12); border-radius: 8px; }
+  .note { color: var(--sub); font-size: 13px; line-height: 1.6; margin-top: 8px; }
+  .warn { color: var(--accent2); }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>📖 English Diary Shadowing Player</h1>
-        <p class="subtitle">音声合成でシャドーイング練習</p>
 
-        <div class="controls">
-            <div class="control-group">
-                <label for="speed">⚡ 再生速度</label>
-                <input type="range" id="speed" min="0.5" max="2.0" step="0.1" value="1.0">
-                <div class="speed-display">1.0x</div>
-            </div>
-        </div>
+<h1>Shadowing Player｜アスタナ取材用</h1>
 
-        <div class="button-group">
-            <button class="btn-select-all" onclick="selectAll()">すべて選択</button>
-            <button class="btn-deselect-all" onclick="deselectAll()">選択解除</button>
-        </div>
+<div class="now">
+  <div class="meta"><span id="pos">– / –</span><span class="phase" id="phase">停止中</span></div>
+  <div class="en" id="en">▶ を押すとスタートします</div>
+  <div class="ja" id="ja">画面を見なくても、日本語→英語→シャドーイングの間→次の文、と自動で進みます。</div>
+</div>
 
-        <div class="button-group">
-            <button class="btn-play" onclick="playSelected()">▶ 再生</button>
-            <button class="btn-stop" onclick="stopSpeaking()">⏹ 停止</button>
-        </div>
+<div class="controls">
+  <button id="prevBtn" aria-label="前の文">⏮</button>
+  <button id="playBtn" aria-label="再生・一時停止">▶ スタート</button>
+  <button id="nextBtn" aria-label="次の文">⏭</button>
+</div>
 
-        <div id="status" class="status">選択した文章を再生できます</div>
-
-        <div class="sentence-list" id="sentenceList"></div>
+<details open>
+  <summary>⚙ 設定（運転前に決めておく）</summary>
+  <div class="settings">
+    <div class="row"><label>英語の声</label><select id="voiceSel"></select></div>
+    <div class="row"><label>英語の速さ</label><input type="range" id="rate" min="0.5" max="1.3" step="0.05"><span class="val" id="rateV"></span></div>
+    <div class="row"><label>日本語訳の読み上げ</label>
+      <select id="jaMode">
+        <option value="before">英語の前に読む</option>
+        <option value="after">英語の後に読む</option>
+        <option value="off">読まない</option>
+      </select></div>
+    <div class="row"><label>1文の繰り返し</label>
+      <select id="repeat"><option>1</option><option>2</option><option>3</option><option>5</option></select></div>
+    <div class="row"><label>シャドーイングの間</label><input type="range" id="gap" min="0.5" max="2.5" step="0.1"><span class="val" id="gapV"></span></div>
+    <div class="row"><label>順番</label>
+      <select id="order"><option value="seq">順番どおり</option><option value="shuffle">シャッフル</option></select></div>
+    <div class="row"><label>最後まで行ったら</label>
+      <select id="loop"><option value="1">最初に戻ってくり返す</option><option value="0">止まる</option></select></div>
+    <div>
+      <div class="row" style="margin-bottom:8px"><label>場面で絞り込み</label></div>
+      <div class="chips" id="chips"></div>
     </div>
+    <div class="note">
+      シャドーイングの間は「英文の長さ × この倍率」で自動で決まります。1.0倍なら英文と同じ長さの間が空きます。<br>
+      <span class="warn">設定や選曲は停車中に。運転中は画面に触らず、音声だけで使ってください。</span>
+    </div>
+  </div>
+</details>
 
-    <script>
-        const sentences = [
-            {
-                id: "1",
-                text: "The pay is frustrating.",
-                date: "2026-04-22"
-            },
-            {
-                id: "2",
-                text: "I also worked from home via the internet in the evening.",
-                date: "2026-04-22"
-            },
-            {
-                id: "3",
-                text: "It really made me feel how unequal the world is.",
-                date: "2026-04-22"
-            },
-            {
-                id: "4",
-                text: "After work, I went shopping at Don Quixote for the first time in about half a year.",
-                date: "2026-04-22"
-            },
-            {
-                id: "5",
-                text: "Last night there was heavy rain until morning, and I had a nightmare about a tsunami and almost drowning.",
-                date: "2026-04-22"
-            },
-            {
-                id: "6",
-                text: "It was the same job as yesterday: taking screenshots from an auction site.",
-                date: "2026-04-22"
-            },
-            {
-                id: "7",
-                text: "The site specializes in high-end brand bags, and some secondhand ones go for 100,000 yen or more.",
-                date: "2026-04-22"
-            },
-            {
-                id: "8",
-                text: "Today the weather was nice, but it was very windy—the opening of spring.",
-                date: "2026-04-22"
-            },
-            {
-                id: "9",
-                text: "It was terrible.",
-                date: "2026-04-22"
-            },
-            {
-                id: "10",
-                text: "Still, since I'm working at minimum wage, I can't complain.",
-                date: "2026-04-22"
-            }
-        ];
+<details>
+  <summary>📝 文の一覧（タップでその文から再生）</summary>
+  <div class="list" id="list"></div>
+</details>
 
-        let currentUtterance = null;
-        let currentIndex = 0;
-        let selectedSentences = [];
+<script>
+const SENTENCES = [
+{
+"en": "Hi Robin, it's lovely to finally meet you in person.",
+"cat": "挨拶",
+"ja": "ロビン、やっと直接会えてうれしいです。"
+},
+{
+"en": "I'm Aya, from ejudo in Japan.",
+"cat": "自己紹介",
+"ja": "日本のejudoのアヤです。"
+},
+{
+"en": "I write a weekly column about overseas judo players.",
+"cat": "自己紹介",
+"ja": "海外の柔道選手について週一でコラムを書いています。"
+},
+{
+"en": "This is my first time covering a World Championships.",
+"cat": "自己紹介",
+"ja": "世界選手権の取材は今回が初めてです。"
+},
+{
+"en": "I'm not a judo expert, I'm just a huge fan.",
+"cat": "自己紹介",
+"ja": "柔道の専門家ではなく、ただの大ファンです。"
+},
+{
+"en": "I've been watching JudoTV almost every day since 2020.",
+"cat": "自己紹介",
+"ja": "2020年からほぼ毎日JUDO TVを見ています。"
+},
+{
+"en": "Thank you so much for your help with my accreditation.",
+"cat": "お礼",
+"ja": "取材証の件で助けていただき本当にありがとうございます。"
+},
+{
+"en": "Thanks for the email last week. It was really helpful.",
+"cat": "お礼",
+"ja": "先週のメールありがとう。とても助かりました。"
+},
+{
+"en": "Where can I pick up my media pass?",
+"cat": "仕事",
+"ja": "メディアパスはどこで受け取れますか？"
+},
+{
+"en": "Could you tell me where the mixed zone is?",
+"cat": "仕事",
+"ja": "ミックスゾーンはどこか教えてもらえますか？"
+},
+{
+"en": "What time does the final block start today?",
+"cat": "仕事",
+"ja": "今日の決勝ブロックは何時に始まりますか？"
+},
+{
+"en": "Is it okay if I record the interview?",
+"cat": "仕事",
+"ja": "インタビューを録音してもいいですか？"
+},
+{
+"en": "Am I allowed to take photos from here?",
+"cat": "仕事",
+"ja": "ここから写真を撮ってもいいですか？"
+},
+{
+"en": "Is there Wi-Fi in the media centre?",
+"cat": "仕事",
+"ja": "メディアセンターにWi-Fiはありますか？"
+},
+{
+"en": "Could I possibly speak to him after the medal ceremony?",
+"cat": "仕事",
+"ja": "表彰式の後に彼と話すことはできますか？"
+},
+{
+"en": "Would you be able to help me with translation?",
+"cat": "仕事",
+"ja": "通訳を手伝ってもらえますか？"
+},
+{
+"en": "I'll send you the article once it's published.",
+"cat": "仕事",
+"ja": "記事が公開されたらお送りします。"
+},
+{
+"en": "Let me know if there's anything I should be careful about.",
+"cat": "仕事",
+"ja": "気をつけるべきことがあれば教えてください。"
+},
+{
+"en": "Excuse me, do you have a minute for a quick interview?",
+"cat": "取材",
+"ja": "すみません、少しインタビューの時間をいただけますか？"
+},
+{
+"en": "It'll only take two or three minutes.",
+"cat": "取材",
+"ja": "2、3分で終わります。"
+},
+{
+"en": "I'm writing for Japanese judo fans.",
+"cat": "取材",
+"ja": "日本の柔道ファン向けに書いています。"
+},
+{
+"en": "You have a lot of fans in Japan.",
+"cat": "取材",
+"ja": "日本にはあなたのファンがたくさんいます。"
+},
+{
+"en": "Congratulations on your medal!",
+"cat": "取材",
+"ja": "メダルおめでとうございます！"
+},
+{
+"en": "How are you feeling right now?",
+"cat": "取材",
+"ja": "今の気持ちはどうですか？"
+},
+{
+"en": "What was going through your mind in the final?",
+"cat": "取材",
+"ja": "決勝では何を考えていましたか？"
+},
+{
+"en": "How did you prepare for this tournament?",
+"cat": "取材",
+"ja": "この大会に向けてどう準備しましたか？"
+},
+{
+"en": "Was it difficult to travel straight from the Asian Games?",
+"cat": "取材",
+"ja": "アジア大会から直行するのは大変でしたか？"
+},
+{
+"en": "Who would you like to thank today?",
+"cat": "取材",
+"ja": "今日は誰に感謝したいですか？"
+},
+{
+"en": "Could you say a few words to your fans in Japan?",
+"cat": "取材",
+"ja": "日本のファンにひと言お願いできますか？"
+},
+{
+"en": "Thank you so much, and good luck tomorrow.",
+"cat": "取材",
+"ja": "ありがとうございました、明日も頑張ってください。"
+},
+{
+"en": "Sorry, could you say that again?",
+"cat": "聞き返し",
+"ja": "すみません、もう一度言ってもらえますか？"
+},
+{
+"en": "Could you speak a little more slowly, please?",
+"cat": "聞き返し",
+"ja": "もう少しゆっくり話してもらえますか？"
+},
+{
+"en": "Sorry, my English isn't perfect.",
+"cat": "聞き返し",
+"ja": "すみません、英語が完璧ではなくて。"
+},
+{
+"en": "Do you mean the women's team or the men's team?",
+"cat": "確認",
+"ja": "女子チームのことですか、男子チームのことですか？"
+},
+{
+"en": "Just to check, is that today or tomorrow?",
+"cat": "確認",
+"ja": "念のため、それは今日ですか明日ですか？"
+},
+{
+"en": "How do you spell your name?",
+"cat": "確認",
+"ja": "お名前のつづりを教えてもらえますか？"
+},
+{
+"en": "I'm not sure I understood. Could you write it down?",
+"cat": "確認",
+"ja": "よく分からなかったので、書いてもらえますか？"
+},
+{
+"en": "The atmosphere in the arena is amazing.",
+"cat": "雑談",
+"ja": "会場の雰囲気がすごいですね。"
+},
+{
+"en": "The Kazakh fans are so loud!",
+"cat": "雑談",
+"ja": "カザフスタンのファンの応援はすごい音量ですね！"
+},
+{
+"en": "That was one of the best matches I've ever seen.",
+"cat": "雑談",
+"ja": "今まで見た中で最高の試合のひとつでした。"
+},
+{
+"en": "I didn't expect that result at all.",
+"cat": "雑談",
+"ja": "あの結果はまったく予想していませんでした。"
+},
+{
+"en": "Who do you think will win the mixed team event?",
+"cat": "雑談",
+"ja": "混合団体はどこが勝つと思いますか？"
+},
+{
+"en": "I'm a big fan of the Georgian team.",
+"cat": "雑談",
+"ja": "ジョージアチームの大ファンなんです。"
+},
+{
+"en": "Have you been to Astana before?",
+"cat": "雑談",
+"ja": "アスタナには前に来たことがありますか？"
+},
+{
+"en": "It's my first time in Kazakhstan.",
+"cat": "雑談",
+"ja": "カザフスタンは初めてです。"
+},
+{
+"en": "I'm from Akita, in the north of Japan.",
+"cat": "雑談",
+"ja": "日本の北にある秋田の出身です。"
+},
+{
+"en": "You must be exhausted after such a long day.",
+"cat": "雑談",
+"ja": "長い一日で疲れたでしょう。"
+},
+{
+"en": "I really enjoyed working with you this week.",
+"cat": "締め",
+"ja": "今週一緒に仕事ができて本当に楽しかったです。"
+},
+{
+"en": "I hope to see you again at the Tokyo Grand Slam.",
+"cat": "締め",
+"ja": "東京グランドスラムでまた会えるといいですね。"
+},
+{
+"en": "Take care, and have a safe trip home.",
+"cat": "締め",
+"ja": "お元気で、気をつけて帰ってください。"
+}
+];
 
-        function initializeSentenceList() {
-            const listContainer = document.getElementById('sentenceList');
-            listContainer.innerHTML = '';
+// ---------- 設定の保存（使えない環境でも動くように） ----------
+const STORE_KEY = 'shadowing-astana-settings';
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; }
+}
+function saveSettings() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) {}
+}
+const S = Object.assign({
+  voice: '', rate: 0.85, jaMode: 'before', repeat: '2', gap: 1.2,
+  order: 'seq', loop: '1', cats: []
+}, loadSettings());
 
-            sentences.forEach((sentence, index) => {
-                const item = document.createElement('div');
-                item.className = 'sentence-item';
-                item.id = `item-${sentence.id}`;
+// ---------- 要素 ----------
+const $ = id => document.getElementById(id);
+const enEl = $('en'), jaEl = $('ja'), posEl = $('pos'), phaseEl = $('phase'), playBtn = $('playBtn');
 
-                item.innerHTML = `
-                    <label>
-                        <input type="checkbox" id="checkbox-${sentence.id}" value="${sentence.id}">
-                        <div>
-                            <div class="sentence-text">${sentence.text}</div>
-                            <div class="sentence-date">${sentence.date}</div>
-                        </div>
-                    </label>
-                `;
+// ---------- 状態 ----------
+let queue = [];      // 再生する文のインデックス
+let qi = 0;          // queue内の位置
+let playing = false;
+let runId = 0;       // 停止・スキップ時に古い再生を無効にするための番号
+let wakeLock = null;
 
-                listContainer.appendChild(item);
-            });
-        }
+const synth = window.speechSynthesis;
+let voices = [];
 
-        document.getElementById('speed').addEventListener('input', function() {
-            document.querySelector('.speed-display').textContent = this.value + 'x';
-        });
+// ---------- 声の一覧 ----------
+function loadVoices() {
+  voices = synth.getVoices();
+  const en = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+  // イギリス英語を先頭に
+  en.sort((a, b) => {
+    const ga = a.lang.toLowerCase().includes('gb') ? 0 : 1;
+    const gb = b.lang.toLowerCase().includes('gb') ? 0 : 1;
+    return ga - gb || a.name.localeCompare(b.name);
+  });
+  const sel = $('voiceSel');
+  sel.innerHTML = '';
+  if (!en.length) {
+    sel.innerHTML = '<option value="">（端末の標準の声）</option>';
+    return;
+  }
+  en.forEach(v => {
+    const o = document.createElement('option');
+    o.value = v.name;
+    o.textContent = (v.lang.toLowerCase().includes('gb') ? '🇬🇧 ' : '') + v.name + ' (' + v.lang + ')';
+    sel.appendChild(o);
+  });
+  if (!S.voice || !en.find(v => v.name === S.voice)) S.voice = en[0].name;
+  sel.value = S.voice;
+}
+loadVoices();
+if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
 
-        function selectAll() {
-            document.querySelectorAll('.sentence-list input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = true;
-            });
-        }
+function enVoice() { return voices.find(v => v.name === S.voice) || null; }
+function jaVoice() {
+  return voices.find(v => v.lang && v.lang.toLowerCase().replace('_', '-').startsWith('ja')) || null;
+}
 
-        function deselectAll() {
-            document.querySelectorAll('.sentence-list input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = false;
-            });
-        }
+// ---------- 読み上げ（終わるまで待つ） ----------
+function speak(text, lang, rate, myRun) {
+  return new Promise(resolve => {
+    if (myRun !== runId) return resolve(0);
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    u.rate = rate;
+    const v = lang.startsWith('ja') ? jaVoice() : enVoice();
+    if (v) u.voice = v;
+    let started = 0;
+    u.onstart = () => { started = performance.now(); };
+    const done = () => resolve(started ? (performance.now() - started) / 1000 : estimate(text, rate));
+    u.onend = done;
+    u.onerror = done;
+    synth.speak(u);
+  });
+}
+function estimate(text, rate) { return Math.max(1.2, text.split(/\s+/).length * 0.38 / rate); }
 
-        function playSelected() {
-            stopSpeaking();
+function wait(sec, myRun) {
+  return new Promise(resolve => {
+    const t = setTimeout(resolve, sec * 1000);
+    const check = setInterval(() => { if (myRun !== runId) { clearTimeout(t); clearInterval(check); resolve(); } }, 100);
+    setTimeout(() => clearInterval(check), sec * 1000 + 50);
+  });
+}
 
-            const checkboxes = document.querySelectorAll('.sentence-list input[type="checkbox"]:checked');
-            
-            if (checkboxes.length === 0) {
-                updateStatus('文章を選択してください');
-                return;
-            }
+// ---------- 画面表示 ----------
+function show(idx, phase) {
+  const s = SENTENCES[idx];
+  enEl.textContent = s.en;
+  jaEl.textContent = '【' + s.cat + '】' + s.ja;
+  posEl.textContent = (qi + 1) + ' / ' + queue.length;
+  phaseEl.textContent = phase;
+  document.querySelectorAll('.item').forEach(el => el.classList.toggle('cur', Number(el.dataset.i) === idx));
+}
 
-            selectedSentences = Array.from(checkboxes).map(cb => {
-                const sentence = sentences.find(s => s.id === cb.value);
-                return sentence;
-            });
+// ---------- 再生の流れ ----------
+async function runFrom(myRun) {
+  while (playing && myRun === runId) {
+    if (qi >= queue.length) {
+      if (S.loop === '1') { buildQueue(true); qi = 0; }
+      else { stop('最後まで再生しました'); return; }
+    }
+    const idx = queue[qi];
+    const s = SENTENCES[idx];
 
-            currentIndex = 0;
-            playNext();
-        }
+    if (S.jaMode === 'before') {
+      show(idx, '日本語');
+      await speak(s.ja, 'ja-JP', 1.0, myRun);
+      if (myRun !== runId) return;
+      await wait(0.6, myRun);
+    }
 
-        function playNext() {
-            if (currentIndex >= selectedSentences.length) {
-                updateStatus('再生完了');
-                removeAllPlayingHighlight();
-                return;
-            }
+    const reps = Number(S.repeat);
+    for (let r = 0; r < reps; r++) {
+      if (myRun !== runId) return;
+      show(idx, '英語 ' + (r + 1) + '/' + reps);
+      const dur = await speak(s.en, 'en-GB', Number(S.rate), myRun);
+      if (myRun !== runId) return;
+      show(idx, '🗣 あなたの番');
+      await wait(dur * Number(S.gap) + 0.4, myRun);
+    }
 
-            const sentence = selectedSentences[currentIndex];
-            const speed = parseFloat(document.getElementById('speed').value);
+    if (S.jaMode === 'after') {
+      if (myRun !== runId) return;
+      show(idx, '日本語');
+      await speak(s.ja, 'ja-JP', 1.0, myRun);
+    }
 
-            currentUtterance = new SpeechSynthesisUtterance(sentence.text);
-            currentUtterance.lang = 'en-US';
-            currentUtterance.rate = speed;
+    if (myRun !== runId) return;
+    await wait(1.0, myRun);
+    qi++;
+  }
+}
 
-            removeAllPlayingHighlight();
-            const item = document.getElementById(`item-${sentence.id}`);
-            if (item) {
-                item.classList.add('playing');
-            }
+function buildQueue(reshuffle) {
+  const cats = S.cats;
+  let list = SENTENCES.map((s, i) => i).filter(i => !cats.length || cats.includes(SENTENCES[i].cat));
+  if (!list.length) list = SENTENCES.map((s, i) => i);
+  if (S.order === 'shuffle' && reshuffle !== false) {
+    for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+  }
+  queue = list;
+}
 
-            updateStatus(`再生中: ${currentIndex + 1} / ${selectedSentences.length}`);
+function start() {
+  playing = true;
+  runId++;
+  playBtn.textContent = '⏸ 一時停止';
+  playBtn.classList.add('playing');
+  synth.cancel();
+  runFrom(runId);   // iPhoneでは、ボタンを押した直後に読み上げを始める必要がある
+  keepAwake();
+}
 
-            currentUtterance.onend = () => {
-                currentIndex++;
-                playNext();
-            };
+function stop(msg) {
+  playing = false;
+  runId++;
+  synth.cancel();
+  playBtn.textContent = '▶ スタート';
+  playBtn.classList.remove('playing');
+  phaseEl.textContent = msg || '一時停止中';
+  releaseAwake();
+}
 
-            currentUtterance.onerror = (event) => {
-                console.error('Speech synthesis error:', event);
-                updateStatus('エラーが発生しました');
-                currentIndex++;
-                playNext();
-            };
+function jump(delta) {
+  if (!queue.length) buildQueue();
+  qi = Math.min(Math.max(0, qi + delta), queue.length - 1);
+  show(queue[qi], playing ? '' : '一時停止中');
+  if (playing) { runId++; synth.cancel(); runFrom(runId); }
+}
 
-            window.speechSynthesis.speak(currentUtterance);
-        }
+// ---------- 画面を消さない（対応端末のみ） ----------
+async function keepAwake() {
+  try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { wakeLock = null; }
+}
+function releaseAwake() { try { if (wakeLock) wakeLock.release(); } catch (e) {} wakeLock = null; }
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && playing) keepAwake();
+});
 
-        function stopSpeaking() {
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
-            }
-            removeAllPlayingHighlight();
-            updateStatus('停止しました');
-        }
+// ---------- ボタン ----------
+playBtn.onclick = () => {
+  if (playing) { stop(); return; }
+  if (!queue.length) { buildQueue(); qi = 0; }
+  start();
+};
+$('prevBtn').onclick = () => jump(-1);
+$('nextBtn').onclick = () => jump(1);
 
-        function removeAllPlayingHighlight() {
-            document.querySelectorAll('.sentence-item').forEach(item => {
-                item.classList.remove('playing');
-            });
-        }
+// ---------- 設定UI ----------
+function bindSetting(id, key, fmt) {
+  const el = $(id);
+  el.value = S[key];
+  const upd = () => { S[key] = el.value; if (fmt) $(id + 'V').textContent = fmt(el.value); saveSettings(); };
+  el.addEventListener('input', upd);
+  el.addEventListener('change', upd);
+  if (fmt) $(id + 'V').textContent = fmt(el.value);
+}
+$('voiceSel').addEventListener('change', e => { S.voice = e.target.value; saveSettings(); });
+bindSetting('rate', 'rate', v => Number(v).toFixed(2) + 'x');
+bindSetting('gap', 'gap', v => Number(v).toFixed(1) + '倍');
+bindSetting('jaMode', 'jaMode');
+bindSetting('repeat', 'repeat');
+bindSetting('loop', 'loop');
+$('order').value = S.order;
+$('order').addEventListener('change', e => { S.order = e.target.value; saveSettings(); buildQueue(); qi = 0; });
 
-        function updateStatus(message) {
-            const statusEl = document.getElementById('status');
-            statusEl.textContent = message;
-            
-            if (message.includes('再生中')) {
-                statusEl.classList.add('playing');
-            } else {
-                statusEl.classList.remove('playing');
-            }
-        }
+// 場面チップ
+const CATS = [...new Set(SENTENCES.map(s => s.cat))];
+function renderChips() {
+  const box = $('chips');
+  box.innerHTML = '';
+  const all = document.createElement('button');
+  all.className = 'chip' + (S.cats.length ? '' : ' on');
+  all.textContent = 'すべて';
+  all.onclick = () => { S.cats = []; afterCat(); };
+  box.appendChild(all);
+  CATS.forEach(c => {
+    const b = document.createElement('button');
+    const n = SENTENCES.filter(s => s.cat === c).length;
+    b.className = 'chip' + (S.cats.includes(c) ? ' on' : '');
+    b.textContent = c + ' ' + n;
+    b.onclick = () => {
+      S.cats = S.cats.includes(c) ? S.cats.filter(x => x !== c) : [...S.cats, c];
+      afterCat();
+    };
+    box.appendChild(b);
+  });
+}
+function afterCat() { saveSettings(); renderChips(); buildQueue(); qi = 0; if (playing) { runId++; synth.cancel(); runFrom(runId); } }
 
-        initializeSentenceList();
-    </script>
+// 一覧
+function renderList() {
+  const box = $('list');
+  box.innerHTML = '';
+  SENTENCES.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'item';
+    d.dataset.i = i;
+    d.innerHTML = '<div class="n">' + (i + 1) + '</div><div><div class="t"></div><div class="s"></div></div>';
+    d.querySelector('.t').textContent = s.en;
+    d.querySelector('.s').textContent = '【' + s.cat + '】' + s.ja;
+    d.onclick = () => {
+      S.cats = []; saveSettings(); renderChips();
+      S.order = 'seq'; $('order').value = 'seq';
+      buildQueue(false);
+      qi = queue.indexOf(i);
+      if (playing) { runId++; synth.cancel(); runFrom(runId); } else { show(i, '一時停止中'); }
+    };
+    box.appendChild(d);
+  });
+}
+
+renderChips();
+renderList();
+buildQueue();
+
+if (!('speechSynthesis' in window)) {
+  enEl.textContent = 'このブラウザは音声読み上げに対応していません';
+  playBtn.disabled = true;
+}
+</script>
 </body>
 </html>

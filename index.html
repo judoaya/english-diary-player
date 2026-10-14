@@ -195,7 +195,12 @@ function enVoice() { return voices.find(v => v.name === S.voice) || null; }
 function jaVoice() {
   return voices.find(v => v.lang && v.lang.toLowerCase().replace('_', '-').startsWith('ja')) || null;
 }
-
+function voiceFor(lang) {
+  const key = lang.toLowerCase().replace('_', '-');
+  return voices.find(v => v.lang && v.lang.toLowerCase().replace('_', '-') === key)
+      || voices.find(v => v.lang && v.lang.toLowerCase().startsWith(key.slice(0, 2)))
+      || null;
+}
 // ---------- 読み上げ（終わるまで待つ） ----------
 function speak(text, lang, rate, myRun) {
   return new Promise(resolve => {
@@ -203,7 +208,7 @@ function speak(text, lang, rate, myRun) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
     u.rate = rate;
-    const v = lang.startsWith('ja') ? jaVoice() : enVoice();
+    const v = lang.startsWith('en') ? enVoice() : VoiceFor(lang);
     if (v) u.voice = v;
     let started = 0;
     u.onstart = () => { started = performance.now(); };
@@ -259,7 +264,7 @@ async function runFrom(myRun) {
     for (let r = 0; r < reps; r++) {
       if (myRun !== runId) return;
       show(idx, '英語 ' + (r + 1) + '/' + reps);
-      const dur = await speak(s.en, 'en-GB', Number(S.rate), myRun);
+     const dur = await speak(s.en, s.lang || 'en-GB', Number(S.rate), myRun);
       if (myRun !== runId) return;
       show(idx, '🗣 あなたの番');
       await wait(dur * Number(S.gap) + 0.4, myRun);

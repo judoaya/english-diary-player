@@ -7,6 +7,9 @@ const SENTENCES_WEEK = "2026年10月 第1週（初期50文）";
 
 const SENTENCES = [
 
+  // --- 固定の挨拶（ロシア語） ---
+  { en: "Здравствуйте", ja: "こんにちは（ロシア語）", cat: "挨拶", keep: true },
+
   // --- 挨拶 ---
   { en: "Hi Robin, it's lovely to finally meet you in person.", ja: "ロビン、やっと直接会えてうれしいです。", cat: "挨拶" },
 

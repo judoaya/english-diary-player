@@ -154,10 +154,10 @@ const $ = id => document.getElementById(id);
 const enEl = $('en'), jaEl = $('ja'), posEl = $('pos'), phaseEl = $('phase'), playBtn = $('playBtn');
 
 // ---------- 状態 ----------
-let queue = [];      // 再生する文のインデックス
-let qi = 0;          // queue内の位置
+let queue = [];
+let qi = 0;
 let playing = false;
-let runId = 0;       // 停止・スキップ時に古い再生を無効にするための番号
+let runId = 0;
 let wakeLock = null;
 
 const synth = window.speechSynthesis;
@@ -167,7 +167,6 @@ let voices = [];
 function loadVoices() {
   voices = synth.getVoices();
   const en = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
-  // イギリス英語を先頭に
   en.sort((a, b) => {
     const ga = a.lang.toLowerCase().includes('gb') ? 0 : 1;
     const gb = b.lang.toLowerCase().includes('gb') ? 0 : 1;
@@ -195,12 +194,14 @@ function enVoice() { return voices.find(v => v.name === S.voice) || null; }
 function jaVoice() {
   return voices.find(v => v.lang && v.lang.toLowerCase().replace('_', '-').startsWith('ja')) || null;
 }
+// 指定言語（例: ru-RU）の声を探す。見つからなければ null（端末の標準の声になる）
 function voiceFor(lang) {
   const key = lang.toLowerCase().replace('_', '-');
   return voices.find(v => v.lang && v.lang.toLowerCase().replace('_', '-') === key)
       || voices.find(v => v.lang && v.lang.toLowerCase().startsWith(key.slice(0, 2)))
       || null;
 }
+
 // ---------- 読み上げ（終わるまで待つ） ----------
 function speak(text, lang, rate, myRun) {
   return new Promise(resolve => {
@@ -208,7 +209,7 @@ function speak(text, lang, rate, myRun) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang;
     u.rate = rate;
-    const v = lang.startsWith('en') ? enVoice() : VoiceFor(lang);
+    const v = lang.startsWith('en') ? enVoice() : voiceFor(lang);
     if (v) u.voice = v;
     let started = 0;
     u.onstart = () => { started = performance.now(); };
@@ -264,7 +265,7 @@ async function runFrom(myRun) {
     for (let r = 0; r < reps; r++) {
       if (myRun !== runId) return;
       show(idx, '英語 ' + (r + 1) + '/' + reps);
-     const dur = await speak(s.en, s.lang || 'en-GB', Number(S.rate), myRun);
+      const dur = await speak(s.en, s.lang || 'en-GB', Number(S.rate), myRun);
       if (myRun !== runId) return;
       show(idx, '🗣 あなたの番');
       await wait(dur * Number(S.gap) + 0.4, myRun);
@@ -299,7 +300,7 @@ function start() {
   playBtn.textContent = '⏸ 一時停止';
   playBtn.classList.add('playing');
   synth.cancel();
-  runFrom(runId);   // iPhoneでは、ボタンを押した直後に読み上げを始める必要がある
+  runFrom(runId);
   keepAwake();
 }
 
@@ -409,7 +410,7 @@ function renderList() {
   });
 }
 
-// 覚えた文の数とコピー（毎週の入れ替え相談用）
+// 覚えた文の数とコピー
 function updateDoneCount() {
   const n = SENTENCES.filter(isDone).length;
   $('doneCount').textContent = '覚えた文：' + n + ' / ' + SENTENCES.length;

@@ -5,7 +5,7 @@
 // isNew: true = 今回新しく入った文（なくても動きます）
 // 文字の中に " を使うときは \" と書きます。行の最後のカンマは消さないでください。
 
-const SENTENCES_WEEK = "2026年10月 第4週（15文入れ替え）";
+const SENTENCES_WEEK = "2026年10月 第4週（14文追加・全65文）";
 
 const SENTENCES = [
 
@@ -32,10 +32,13 @@ const SENTENCES = [
   { en: "Could I possibly speak to him after the medal ceremony?", ja: "表彰式の後に彼と話すことはできますか？", cat: "仕事" },
   { en: "I'll send you the article once it's published.", ja: "記事が公開されたらお送りします。", cat: "仕事" },
   { en: "Let me know if there's anything I should be careful about.", ja: "気をつけるべきことがあれば教えてください。", cat: "仕事" },
-  { en: "Which seats are reserved for the press?", ja: "記者席はどこですか？", cat: "仕事", isNew: true },
-  { en: "Do I need to wear my pass at all times?", ja: "パスはずっと着けておく必要がありますか？", cat: "仕事", isNew: true },
-  { en: "When will the official photos be available?", ja: "公式写真はいつ公開されますか？", cat: "仕事", isNew: true },
-  { en: "Is there a quiet place where I can write?", ja: "記事を書ける静かな場所はありますか？", cat: "仕事", isNew: true },
+  { en: "Which seats are reserved for the press?", ja: "記者席はどこですか？", cat: "仕事" },
+  { en: "Do I need to wear my pass at all times?", ja: "パスはずっと着けておく必要がありますか？", cat: "仕事" },
+  { en: "When will the official photos be available?", ja: "公式写真はいつ公開されますか？", cat: "仕事" },
+  { en: "Is there a quiet place where I can write?", ja: "記事を書ける静かな場所はありますか？", cat: "仕事" },
+  { en: "Is the press conference in English or Russian?", ja: "記者会見は英語ですか、ロシア語ですか？", cat: "仕事", isNew: true },
+  { en: "Where can I charge my laptop?", ja: "ノートパソコンを充電できる場所はどこですか？", cat: "仕事", isNew: true },
+  { en: "What time does the venue open tomorrow?", ja: "明日、会場は何時に開きますか？", cat: "仕事", isNew: true },
 
   // --- 取材 ---
   { en: "Excuse me, do you have a minute for a quick interview?", ja: "すみません、少しインタビューの時間をいただけますか？", cat: "取材" },
@@ -45,10 +48,14 @@ const SENTENCES = [
   { en: "Was it hard to make weight for this tournament?", ja: "この大会に向けての減量は大変でしたか？", cat: "取材" },
   { en: "Could you say a few words to your fans in Japan?", ja: "日本のファンにひと言お願いできますか？", cat: "取材" },
   { en: "Thank you so much, and good luck tomorrow.", ja: "ありがとうございました、明日も頑張ってください。", cat: "取材" },
-  { en: "What does this medal mean to you?", ja: "このメダルはあなたにとってどんな意味がありますか？", cat: "取材", isNew: true },
-  { en: "Which match was the toughest today?", ja: "今日一番きつかった試合はどれですか？", cat: "取材", isNew: true },
-  { en: "What's your next goal?", ja: "次の目標は何ですか？", cat: "取材", isNew: true },
-  { en: "Can I quote you on that?", ja: "今のお話を記事で使ってもいいですか？", cat: "取材", isNew: true },
+  { en: "What does this medal mean to you?", ja: "このメダルはあなたにとってどんな意味がありますか？", cat: "取材" },
+  { en: "Which match was the toughest today?", ja: "今日一番きつかった試合はどれですか？", cat: "取材" },
+  { en: "What's your next goal?", ja: "次の目標は何ですか？", cat: "取材" },
+  { en: "Can I quote you on that?", ja: "今のお話を記事で使ってもいいですか？", cat: "取材" },
+  { en: "Your throw in the semi-final was incredible.", ja: "準決勝の投げはすごかったです。", cat: "取材", isNew: true },
+  { en: "How's your knee? Is it okay now?", ja: "膝の具合はどうですか？もう大丈夫ですか？", cat: "取材", isNew: true },
+  { en: "Could I take a quick photo with you?", ja: "一緒に写真を一枚撮ってもいいですか？", cat: "取材", isNew: true },
+  { en: "Can I follow you on Instagram?", ja: "インスタをフォローしてもいいですか？", cat: "取材", isNew: true },
 
   // --- 聞き返し ---
   { en: "Sorry, could you say that again?", ja: "すみません、もう一度言ってもらえますか？", cat: "聞き返し", keep: true },
@@ -67,18 +74,27 @@ const SENTENCES = [
   { en: "I'm a big fan of the Georgian team.", ja: "ジョージアチームの大ファンなんです。", cat: "雑談" },
   { en: "It's my first time in Kazakhstan.", ja: "カザフスタンは初めてです。", cat: "雑談" },
   { en: "I'm originally from near Tokyo, but now I live in Akita, in the north of Japan.", ja: "東京の近くの出身で、今は日本の北にある秋田に住んでいます。", cat: "雑談", keep: true },
-  { en: "How long have you been working for the IJF?", ja: "IJFで働いてどのくらいになりますか？", cat: "雑談", isNew: true },
-  { en: "Do you get any time off during the championships?", ja: "大会期間中にお休みはありますか？", cat: "雑談", isNew: true },
-  { en: "Have you had a chance to try any local food?", ja: "地元の料理は食べてみましたか？", cat: "雑談", isNew: true },
-  { en: "It's much warmer here than I expected.", ja: "思っていたよりずっと暖かいですね。", cat: "雑談", isNew: true },
-  { en: "I'm staying about twenty minutes' walk from the arena.", ja: "会場から歩いて20分くらいの所に泊まっています。", cat: "雑談", isNew: true },
-  { en: "Who's your favourite player to watch?", ja: "見ていて一番好きな選手は誰ですか？", cat: "雑談", isNew: true },
+  { en: "How long have you been working for the IJF?", ja: "IJFで働いてどのくらいになりますか？", cat: "雑談" },
+  { en: "Do you get any time off during the championships?", ja: "大会期間中にお休みはありますか？", cat: "雑談" },
+  { en: "Have you had a chance to try any local food?", ja: "地元の料理は食べてみましたか？", cat: "雑談" },
+  { en: "It's much warmer here than I expected.", ja: "思っていたよりずっと暖かいですね。", cat: "雑談" },
+  { en: "I'm staying about twenty minutes' walk from the arena.", ja: "会場から歩いて20分くらいの所に泊まっています。", cat: "雑談" },
+  { en: "Who's your favourite player to watch?", ja: "見ていて一番好きな選手は誰ですか？", cat: "雑談" },
+  { en: "Your team does a great job with the live stream.", ja: "ライブ配信、いつも素晴らしいですね。", cat: "雑談", isNew: true },
+  { en: "I often share IJF clips with Japanese fans.", ja: "IJFの動画をよく日本のファンに紹介しています。", cat: "雑談", isNew: true },
+  { en: "I'm here until the very last day.", ja: "最終日までいます。", cat: "雑談", isNew: true },
+
+  // --- 移動・生活 ---
+  { en: "Could you take me to Barys Arena, please?", ja: "バリス・アリーナまでお願いします。", cat: "移動・生活", isNew: true },
+  { en: "How long does it take to get to the airport?", ja: "空港までどのくらいかかりますか？", cat: "移動・生活", isNew: true },
+  { en: "Is there a supermarket near here?", ja: "この近くにスーパーはありますか？", cat: "移動・生活", isNew: true },
+  { en: "Can I pay by card?", ja: "カードで払えますか？", cat: "移動・生活", isNew: true },
 
   // --- 締め ---
   { en: "I really enjoyed working with you this week.", ja: "今週一緒に仕事ができて本当に楽しかったです。", cat: "締め" },
   { en: "I hope to see you again at the Tokyo Grand Slam.", ja: "東京グランドスラムでまた会えるといいですね。", cat: "締め" },
   { en: "Take care, and have a safe trip home.", ja: "お元気で、気をつけて帰ってください。", cat: "締め" },
-  { en: "Thanks for everything. I couldn't have done it without you.", ja: "いろいろありがとう。あなたがいなかったらできませんでした。", cat: "締め", isNew: true },
+  { en: "Thanks for everything. I couldn't have done it without you.", ja: "いろいろありがとう。あなたがいなかったらできませんでした。", cat: "締め" },
 
 ];
 

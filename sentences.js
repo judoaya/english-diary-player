@@ -55,7 +55,7 @@ const SENTENCES = [
   { en: "Your throw in the semi-final was incredible.", ja: "準決勝の投げはすごかったです。", cat: "取材", isNew: true },
   { en: "How's your knee? Is it okay now?", ja: "膝の具合はどうですか？もう大丈夫ですか？", cat: "取材", isNew: true },
   { en: "Could I take a quick photo with you?", ja: "一緒に写真を一枚撮ってもいいですか？", cat: "取材", isNew: true },
-  { en: "Can I follow you on Instagram?", ja: "インスタをフォローしてもいいですか？", cat: "取材", isNew: true },
+  { en: "I already follow you on Instagram. I love your posts!", ja: "インスタもうフォローしてます。投稿、大好きです！", cat: "取材", isNew: true },
 
   // --- 聞き返し ---
   { en: "Sorry, could you say that again?", ja: "すみません、もう一度言ってもらえますか？", cat: "聞き返し", keep: true },

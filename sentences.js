@@ -15,7 +15,8 @@ const SENTENCES = [
   { en: "Sorry, could you say that again?", ja: "すみません、もう一度言ってもらえますか？", cat: "聞き返し", keep: true },
   { en: "Could you speak a little more slowly, please?", ja: "もう少しゆっくり話してもらえますか？", cat: "聞き返し", keep: true },
   { en: "Sorry, my English isn't perfect.", ja: "すみません、英語が完璧ではなくて。", cat: "聞き返し", keep: true },
-  { en: "How do you spell your name?", ja: "お名前のつづりを教えてもらえますか？", cat: "聞き返し", keep: true },
+  { en: "Sorry, how do you pronounce your name?", ja: "すみません、お名前はどう発音しますか？", cat: "聞き返し", keep: true },
+  { en: "Could you write your name here for me?", ja: "ここにお名前を書いてもらえますか？", cat: "聞き返し", keep: true },
   { en: "I'm not sure I understood. Could you write it down?", ja: "よく分からなかったので、書いてもらえますか？", cat: "聞き返し", keep: true },
 
   // --- 自己紹介・名刺 ---

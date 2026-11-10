@@ -7,7 +7,7 @@
 //
 // アスタナ用の文は sentences_astana.js に保管しています（読み込まれません）。
 
-const SENTENCES_WEEK = "グランドスラム東京2026 取材用（12月5日・6日）全51文";
+const SENTENCES_WEEK = "グランドスラム東京2026 取材用（12月5日・6日）全52文";
 
 const SENTENCES = [
 

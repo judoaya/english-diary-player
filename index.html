@@ -52,17 +52,21 @@
   .item .t { font-size: 15px; }
   .item .s { font-size: 13px; color: var(--sub); margin-top: 2px; }
   .item.cur { background: rgba(79,179,255,0.12); border-radius: 8px; }
-  .item .done { flex-shrink: 0; align-self: center; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line);
+  .item .done { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line);
     background: var(--bg); color: var(--sub); font-size: 13px; cursor: pointer; }
   .item .done.on { background: #2e7d4f; border-color: #2e7d4f; color: #fff; font-weight: 700; }
-  .donebar { display: flex; justify-content: space-between; align-items: center; padding: 0 16px 10px; color: var(--sub); font-size: 14px; }
+  .item .btns { flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; align-self: center; }
+  .item .fix { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--sub); font-size: 13px; cursor: pointer; }
+  .item .fix.on { background: #b7791f; border-color: #b7791f; color: #fff; font-weight: 700; }
+  .donebar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 16px 10px; color: var(--sub); font-size: 14px; }
   .note { color: var(--sub); font-size: 13px; line-height: 1.6; margin-top: 8px; }
   .warn { color: var(--accent2); }
 </style>
 </head>
 <body>
 
-<h1>Shadowing Player｜アスタナ取材用</h1>
+<h1>Shadowing Player｜取材用</h1>
 <div class="week" id="week"></div>
 
 <div class="now">
@@ -114,6 +118,7 @@
 <details>
   <summary>📝 文の一覧（タップでその文から再生）</summary>
   <div class="donebar"><span id="doneCount"></span><button id="copyDone" class="chip">覚えた文をコピー</button></div>
+  <div class="donebar"><span id="fixCount"></span><button id="copyFix" class="chip">直したい文をコピー</button></div>
   <div class="list" id="list"></div>
 </details>
 
@@ -149,15 +154,25 @@ function toggleDone(s) {
   try { localStorage.setItem(DONE_KEY, JSON.stringify(DONE)); } catch (e) {}
 }
 
+// ---------- 「直したい」印（英文をキーに、この端末だけに保存。再生には影響しない） ----------
+const FIX_KEY = 'shadowing-astana-fix';
+let FIX = [];
+try { FIX = JSON.parse(localStorage.getItem(FIX_KEY)) || []; } catch (e) { FIX = []; }
+const isFix = s => FIX.includes(s.en);
+function toggleFix(s) {
+  FIX = isFix(s) ? FIX.filter(x => x !== s.en) : [...FIX, s.en];
+  try { localStorage.setItem(FIX_KEY, JSON.stringify(FIX)); } catch (e) {}
+}
+
 // ---------- 要素 ----------
 const $ = id => document.getElementById(id);
 const enEl = $('en'), jaEl = $('ja'), posEl = $('pos'), phaseEl = $('phase'), playBtn = $('playBtn');
 
 // ---------- 状態 ----------
-let queue = [];
-let qi = 0;
+let queue = [];      // 再生する文のインデックス
+let qi = 0;          // queue内の位置
 let playing = false;
-let runId = 0;
+let runId = 0;       // 停止・スキップ時に古い再生を無効にするための番号
 let wakeLock = null;
 
 const synth = window.speechSynthesis;
@@ -167,6 +182,7 @@ let voices = [];
 function loadVoices() {
   voices = synth.getVoices();
   const en = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+  // イギリス英語を先頭に
   en.sort((a, b) => {
     const ga = a.lang.toLowerCase().includes('gb') ? 0 : 1;
     const gb = b.lang.toLowerCase().includes('gb') ? 0 : 1;
@@ -300,7 +316,7 @@ function start() {
   playBtn.textContent = '⏸ 一時停止';
   playBtn.classList.add('playing');
   synth.cancel();
-  runFrom(runId);
+  runFrom(runId);   // iPhoneでは、ボタンを押した直後に読み上げを始める必要がある
   keepAwake();
 }
 
@@ -392,13 +408,17 @@ function renderList() {
     const d = document.createElement('div');
     d.className = 'item';
     d.dataset.i = i;
-    d.innerHTML = '<div class="n">' + (i + 1) + '</div><div style="flex:1"><div class="t"></div><div class="s"></div></div><button class="done"></button>';
+    d.innerHTML = '<div class="n">' + (i + 1) + '</div><div style="flex:1"><div class="t"></div><div class="s"></div></div><div class="btns"><button class="done"></button><button class="fix"></button></div>';
     d.querySelector('.t').textContent = s.en;
     d.querySelector('.s').textContent = '【' + s.cat + '】' + s.ja + (s.keep ? '　📌固定' : '');
     const btn = d.querySelector('.done');
     const paint = () => { btn.classList.toggle('on', isDone(s)); btn.textContent = isDone(s) ? '✓ 覚えた' : '覚えた？'; };
     paint();
     btn.onclick = ev => { ev.stopPropagation(); toggleDone(s); paint(); updateDoneCount(); if (S.skipDone === '1') { buildQueue(); qi = 0; } };
+    const fbtn = d.querySelector('.fix');
+    const paintFix = () => { fbtn.classList.toggle('on', isFix(s)); fbtn.textContent = isFix(s) ? '✏️ 直したい' : '直したい？'; };
+    paintFix();
+    fbtn.onclick = ev => { ev.stopPropagation(); toggleFix(s); paintFix(); updateFixCount(); };
     d.onclick = () => {
       S.cats = []; saveSettings(); renderChips();
       S.order = 'seq'; $('order').value = 'seq';
@@ -410,7 +430,7 @@ function renderList() {
   });
 }
 
-// 覚えた文の数とコピー
+// 覚えた文の数とコピー（毎週の入れ替え相談用）
 function updateDoneCount() {
   const n = SENTENCES.filter(isDone).length;
   $('doneCount').textContent = '覚えた文：' + n + ' / ' + SENTENCES.length;
@@ -423,9 +443,24 @@ $('copyDone').onclick = async () => {
   setTimeout(() => { $('copyDone').textContent = '覚えた文をコピー'; }, 2000);
 };
 
+// 直したい文の数とコピー（番号・英文・日本語訳をまとめてコピー）
+function updateFixCount() {
+  const n = SENTENCES.filter(isFix).length;
+  $('fixCount').textContent = '直したい文：' + n;
+}
+$('copyFix').onclick = async () => {
+  const list = SENTENCES.map((s, i) => [s, i]).filter(([s]) => isFix(s))
+    .map(([s, i]) => (i + 1) + '. ' + s.en + '\n   ' + s.ja + '\n   → ').join('\n');
+  const text = '【直したい文】\n' + (list || '（なし）');
+  try { await navigator.clipboard.writeText(text); $('copyFix').textContent = 'コピーしました'; }
+  catch (e) { prompt('この文をコピーしてください', text); }
+  setTimeout(() => { $('copyFix').textContent = '直したい文をコピー'; }, 2000);
+};
+
 renderChips();
 renderList();
 updateDoneCount();
+updateFixCount();
 buildQueue();
 
 if (!('speechSynthesis' in window)) {

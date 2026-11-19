@@ -8,7 +8,7 @@
 //
 // アスタナ用の文は sentences_astana.js に保管しています（読み込まれません）。
 
-const SENTENCES_WEEK = "グランドスラム東京2026 取材用（12月5日・6日）全95文";
+const SENTENCES_WEEK = "グランドスラム東京2026 取材用（12月5日・6日）全98文";
 
 const SENTENCES = [
 
@@ -70,37 +70,4 @@ const SENTENCES = [
   { en: "You compete at almost every tournament! Don't you get tired?", ja: "ヘルシュコ選手。ほとんどの大会に出ていますね！疲れませんか？", cat: "選手別", player: "Raz HERSHKO" },
   { en: "Congratulations on your world title and your wedding! What a year!", ja: "ツノダ選手。世界一とご結婚、おめでとうございます！最高の一年ですね！", cat: "選手別", player: "Ai TSUNODA ROUSTANT" },
   { en: "You're even bigger in person! How tall are you?", ja: "ナシボフ選手。実物はさらに大きいですね！身長は何センチですか？", cat: "選手別", player: "Kanan NASIBOV" },
-  { en: "I saw in a JudoTV interview that you're studying English.", ja: "コツォイエフ選手。JUDO TVのインタビューで、英語を勉強中だと見ました。", cat: "選手別", player: "Zelym KOTSOIEV", isNew: true },
-  { en: "I'm studying too, but it's really hard!", ja: "コツォイエフ選手。私も勉強中ですが、すごく難しいです！", cat: "選手別", player: "Zelym KOTSOIEV", isNew: true },
-  { en: "Your brother Aslan is really strong too. What's the secret?", ja: "コツォイエフ選手。弟のアスランもとても強いですよね。強さの秘密は何ですか？", cat: "選手別", player: "Zelym KOTSOIEV", isNew: true },
-  { en: "Your kids are so cute!", ja: "ツカエフ選手。お子さん、めちゃくちゃかわいいですね！", cat: "選手別", player: "Zelim TCKAEV" },
-  { en: "You and your wife both do judo. Do you think your kids will too?", ja: "ツカエフ選手。ご両親とも柔道家だから、お子さんも柔道をやりそうですか？", cat: "選手別", player: "Zelim TCKAEV" },
-  { en: "I heard you speak Japanese. Can I ask my question in Japanese?", ja: "ヤン・ユンウェイ選手。日本語が話せると聞きました。日本語で質問してもいいですか？", cat: "選手別", player: "Yung Wei YANG" },
-  { en: "I'll never forget your waza-ari against Abe Hifumi!", ja: "キム・チャンニョン選手。阿部一二三選手から技ありを取った試合、忘れられません！", cat: "選手別", player: "Channyeong KIM" },
-  { en: "Honestly, I think it was your ippon.", ja: "キム・チャンニョン選手。正直、あれはあなたの一本だったと思っています。", cat: "選手別", player: "Channyeong KIM" },
-  { en: "I love your couple channel. I've subscribed!", ja: "キム・チャンニョン選手。カップルチャンネルも面白くて、登録しています！", cat: "選手別", player: "Channyeong KIM" },
-  { en: "Did your girlfriend come to Japan with you this time?", ja: "キム・チャンニョン選手。今回も彼女さんと一緒に来日していますか？", cat: "選手別", player: "Channyeong KIM" },
-  { en: "You and your rival are such good friends. It's lovely to see.", ja: "キム・ハユン選手。代表を争うライバルとも仲がいいですね。見ていてうれしいです。", cat: "選手別", player: "Hayun KIM" },
-  { en: "Why are Mongolian women so strong at judo?", ja: "アリウンザヤ選手。なぜモンゴル女子はそんなに強いんですか？", cat: "選手別", player: "Ariunzaya TERBISH", isNew: true },
-  { en: "Your teammates are also your rivals. Is that hard sometimes?", ja: "ガンハイチ選手。チームメイトがライバルでもあるのは、大変なときもありますか？", cat: "選手別", player: "Gankhaich BOLD" },
-  { en: "I love your dancing! Why are Mongolians so good at dancing?", ja: "エンフリーレン選手。あなたのダンス、大好きです！モンゴルの人はどうしてそんなにダンスが上手なんですか？", cat: "選手別", player: "Enkhriilen LKHAGVATOGOO", isNew: true },
-  { en: "The Chinese team is so strong these days. What's the secret?", ja: "アイマン選手。最近の中国チームはとても強いですね。秘密は何ですか？", cat: "選手別", player: "Jinesinuer AYIMAN", isNew: true },
-  { en: "You're so tall! Were you tall as a child too?", ja: "ソルディル選手。すごく背が高いですね！小さい頃から大きかったんですか？", cat: "選手別", player: "Jakub SORDYL", isNew: true },
-  { en: "I call you the queen of armlocks!", ja: "シマンスカ選手。私はあなたを「関節技の女王」と呼んでいます！", cat: "選手別", player: "Angelika SZYMANSKA" },
-  { en: "You often come to Japan to train.", ja: "ザホバ選手。よく日本に出稽古に来ていますね。", cat: "選手別", player: "Renata ZACHOVA", isNew: true },
-  { en: "Have you ever had any trouble with the food here?", ja: "ザホバ選手。日本で食事に困ったことはありませんか？", cat: "選手別", player: "Renata ZACHOVA", isNew: true },
-  { en: "My editor at eJudo calls you the judo computer. Do you like that nickname?", ja: "カッセ選手。eJudoの編集長は、あなたを「柔道コンピューター」と呼んでいます。このあだ名、気に入りましたか？", cat: "選手別", player: "Matthias CASSE" },
-  { en: "Your ura-nage is so exciting to watch!", ja: "エリクソン選手。あなたの裏投げは見ていてワクワクします！", cat: "選手別", player: "Ida ERIKSSON" },
-  { en: "Your o-goshi is my favourite throw!", ja: "テルツィドゥ選手。あなたの大腰、大好きな技です！", cat: "選手別", player: "Elisavet TELTSIDOU" },
-  { en: "You've been doing great since you were a cadet. How did you get so strong?", ja: "アクタシュ選手。カデの頃から大活躍ですね。どうやってそんなに強くなったんですか？", cat: "選手別", player: "Emma-Melis AKTAS", isNew: true },
-  { en: "What's the secret to your strength?", ja: "アクタシュ選手。あなたの強さの秘密を教えてください。", cat: "選手別", player: "Emma-Melis AKTAS", isNew: true },
-  { en: "I love the Portuguese judo team!", ja: "ピナ選手。ポルトガルの柔道チームが大好きです！", cat: "選手別", player: "Tais PINA", isNew: true },
-  { en: "It's a small team, but so strong. How do you do it?", ja: "ピナ選手。少数精鋭なのに、とても強いですね。どうやってそんなに強くなるんですか？", cat: "選手別", player: "Tais PINA", isNew: true },
-  { en: "I read the EJU story about how you two met. I wrote about it in my column!", ja: "ドゥッカリ選手。お二人の出会いの話、欧州柔道連盟の記事で読みました。私のコラムでも書いたんです！", cat: "選手別", player: "Hassan DOUKKALI", isNew: true },
-
-  // --- 負けた直後の選手へ ---
-  { en: "Sorry, I know this is a hard moment.", ja: "つらいときにすみません。", cat: "負けた選手へ" },
-  { en: "You fought really well today.", ja: "今日は本当にいい試合でした。", cat: "負けた選手へ" },
-  { en: "I'm a big fan, and I'll keep supporting you.", ja: "大ファンです。これからも応援しています。", cat: "負けた選手へ" },
-  { en: "Please get some rest.", ja: "ゆっくり休んでくださいね。", cat: "負けた選手へ" },
-  { en: "No questions today. I just wanted to say thank you.", ja:
+  { en: "I saw in a JudoTV interview that you're studying English.", ja: "コツォイエフ選手。JUDO TVのインタビューで、英語を勉強中だと見ました。", cat: "選手別",

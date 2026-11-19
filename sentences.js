@@ -70,7 +70,7 @@ const SENTENCES = [
   { en: "You compete at almost every tournament! Don't you get tired?", ja: "ヘルシュコ選手。ほとんどの大会に出ていますね！疲れませんか？", cat: "選手別", player: "Raz HERSHKO" },
   { en: "Congratulations on your world title and your wedding! What a year!", ja: "ツノダ選手。世界一とご結婚、おめでとうございます！最高の一年ですね！", cat: "選手別", player: "Ai TSUNODA ROUSTANT" },
   { en: "You're even bigger in person! How tall are you?", ja: "ナシボフ選手。実物はさらに大きいですね！身長は何センチですか？", cat: "選手別", player: "Kanan NASIBOV" },
-  { en: "I saw in a JudoTV interview that you're studying English.", ja: "コツォイエフ選手。JUDO TVのインタビューで、英語を勉強中だと見ました。", cat: "選手別",
+
   { en: "I saw in a JudoTV interview that you're studying English.", ja: "コツォイエフ選手。JUDO TVのインタビューで、英語を勉強中だと見ました。", cat: "選手別", player: "Zelym KOTSOIEV", isNew: true },
   { en: "I'm studying too, but it's really hard!", ja: "コツォイエフ選手。私も勉強中ですが、すごく難しいです！", cat: "選手別", player: "Zelym KOTSOIEV", isNew: true },
   { en: "Your brother Aslan is really strong too. What's the secret?", ja: "コツォイエフ選手。弟のアスランもとても強いですよね。強さの秘密は何ですか？", cat: "選手別", player: "Zelym KOTSOIEV", isNew: true },
